@@ -1,8 +1,8 @@
 from app.models import Item
 
-items_db: dict[int, Item] = {}
+items_db: dict[str, Item] = {}
 
-def add_item(item: Item) -> int:
+def add_item(item: Item) -> str:
     if item.id in items_db:
         raise ValueError("Item with this ID already exists.")
     items_db[item.id] = item

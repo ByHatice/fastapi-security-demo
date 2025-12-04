@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.models import Item
+from app.models import Item, itemCreate
 from app.db import items_db
 from app.validation import validate_name, validate_price, validate_quantity
 
@@ -7,15 +7,21 @@ from app.validation import validate_name, validate_price, validate_quantity
 router = APIRouter(prefix="/api/v1", tags=["items"])
 
 @router.post("/items", response_model=Item, status_code=201)
-def create_item(item: Item):
-    sanitized_name = validate_name(item.name)
-    validate_price(item.price)
-    validate_quantity(item.quantity)
+def create_item(item_create: itemCreate):
+
+    # Validate
+    sanitized_name = validate_name(item_create.name)
+    validate_price(item_create.price)
+    validate_quantity(item_create.quantity)
     
-    if any(existing.id == item.id for existing in items_db):
-        raise HTTPException(status_code=400, detail="ID already exists")
+    # Create item
+    item = Item(
+        name=sanitized_name,
+        price=item_create.price,
+        quantity=item_create.quantity
+    )
     
-    item.name = sanitized_name
+    # Store
     items_db[item.id] = item
     return item
 
@@ -25,17 +31,13 @@ def read_items():
     return list(items_db.values())
 
 @router.get("/items/{item_id}", response_model=Item)
-def read_item(item_id: int):
-    """Get a specific item by ID"""
-    if item_id not in items_db:  # ← Dictionary check
+def read_item(item_id: str):  
+    if item_id not in items_db:
         raise HTTPException(status_code=404, detail="Item not found")
     return items_db[item_id]
 
 @router.delete("/items/{item_id}", response_model=Item)
-def delete_item(item_id: int):
-    """Delete an item by ID"""
-    if item_id not in items_db:  # ← Dictionary check
+def delete_item(item_id: str): 
+    if item_id not in items_db:
         raise HTTPException(status_code=404, detail="Item not found")
-    
-    deleted_item = items_db.pop(item_id)  # ← Dictionary pop
-    return deleted_item
+    return items_db.pop(item_id)

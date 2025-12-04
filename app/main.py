@@ -7,9 +7,13 @@ from app.db import items_db
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    items_db[1] = Item(id=1, name="Laptop", price=9999, quantity=5)
-    items_db[2] = Item(id=2, name="Keyboard", price=499, quantity=20)
-    items_db[3] = Item(id=3, name="Mouse", price=299, quantity=15)
+    item1 = Item(name="Laptop", price=9999, quantity=5)
+    item2 = Item(name="Keyboard", price=499, quantity=20)
+    item3 = Item(name="Mouse", price=299, quantity=15)
+    
+    items_db[item1.id] = item1
+    items_db[item2.id] = item2
+    items_db[item3.id] = item3
     
     yield
     
